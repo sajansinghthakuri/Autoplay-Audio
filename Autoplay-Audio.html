@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autoplay Audio</title>
+  <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+
+  <!-- Countdown Timer -->
+  <div id="hide">
+    <h4>Audio Plays In</h4>
+    <progress value="10" max="10" id="pageBeginCountdown"></progress>
+    <p><span id="pageBeginCountdownText">5</span> seconds</p>
+  </div>
+
+  <!-- Audio Player with Speed Control -->
+  <div class="speedcontrolcontainer">
+    <audio controls src="2002-anne-marie.mp3" id="my_audio" aria-label="Play Anne Marie's song"></audio>
+    <div>
+      <label for="pbrate">Speed:</label>
+      <input type="range" id="pbrate" min="0.5" max="2" value="1" step="0.1">
+      <span></span>
+    </div>
+  </div>
+
+  <script>
+    // Countdown function with progress bar
+    function ProgressCountdown(timeleft, bar, text) {
+      return new Promise((resolve) => {
+        const countdownTimer = setInterval(() => {
+          if (--timeleft <= 0) {
+            clearInterval(countdownTimer);
+            $('#hide').fadeOut();
+            resolve();
+          }
+          document.getElementById(bar).value = timeleft;
+          document.getElementById(text).textContent = timeleft;
+        }, 1000);
+      });
+    }
+
+    // Start countdown and auto-play audio after
+    ProgressCountdown(5, 'pageBeginCountdown', 'pageBeginCountdownText').then(() => {
+      document.getElementById("my_audio").play();
+    });
+
+    // Audio playback speed control
+    const audio = document.querySelector('#my_audio');
+    const playbackrate = document.querySelector('#pbrate');
+    const display = document.querySelector('.speedcontrolcontainer span');
+
+    // Apply saved playback rate (if any)
+    const savedSpeed = window.localStorage.pbspeed;
+    if (savedSpeed) {
+      audio.playbackRate = savedSpeed;
+      playbackrate.value = savedSpeed;
+    }
+
+    // Display the playback rate as a percentage
+    const displayRate = () => display.innerText = `${Math.round(audio.playbackRate * 100)}%`;
+    displayRate();
+
+    // Update playback rate on change and store in localStorage
+    playbackrate.addEventListener('input', () => {
+      audio.playbackRate = playbackrate.value;
+      displayRate();
+      window.localStorage.pbspeed = playbackrate.value;
+    });
+  </script>
+
+</body>
+</html>
